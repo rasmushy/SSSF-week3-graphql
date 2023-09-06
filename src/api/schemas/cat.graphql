@@ -1,6 +1,9 @@
 # TODO: create graphql schema for cat. Example type definitions:
-
 # Cat: id, cat_name, weight, birthdate, owner, location, filename
+# Location: type, coordinates
+# LocationInput: type, coordinates
+# Query: catById, cats, catsByArea, catsByOwner
+# Mutation: createCat, updateCat, deleteCat
 
 scalar DateTime
 
@@ -14,44 +17,49 @@ type Cat {
   filename: String
 }
 
-# Location: type, coordinates
+enum LocationType {
+  Point
+}
+
 type Location {
-  type: String
-  coordinates: [Int]
+  type: LocationType
+  coordinates: [Float]
 }
 
-# LocationInput: type, coordinates
 input LocationInput {
-  type: String
-  coordinates: [Int]
+  type: LocationType
+  coordinates: [Float] 
 }
 
-# Query: catById, cats, catsByArea, catsByOwner
+input Coordinates {
+  lat: Float
+  lng: Float
+}
+
 type Query {
-  catById(id: ID!): Cat
+  catById(id: ID): Cat
   cats: [Cat]
-  catsByArea(location: LocationInput!): [Cat]
-  catsByOwner(owner: String!): [Cat]
+  catsByArea(topRight: Coordinates!, bottomLeft: Coordinates!): [Cat]
+  catsByOwner(ownerId: ID): [Cat]
 }
 
-# Mutation: createCat, updateCat, deleteCat
 type Mutation {
   createCat(
-    cat_name: String!
-    weight: Float!
-    birthdate: DateTime!
-    owner: String!
-    location: LocationInput!
-    filename: String!
-  ): Cat!
-  updateCat(
-    id: ID!
     cat_name: String
     weight: Float
     birthdate: DateTime
-    owner: String
+    owner: ID
     location: LocationInput
     filename: String
-  ): Cat!
-  deleteCat(id: ID!): Cat!
+  ): Cat
+  updateCat(
+    id: ID
+    cat_name: String
+    weight: Float
+    birthdate: DateTime
+    owner: ID
+    location: LocationInput
+    filename: String
+  ): Cat
+  deleteCat(id: ID): Cat
 }

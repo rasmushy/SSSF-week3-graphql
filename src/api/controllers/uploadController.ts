@@ -4,24 +4,20 @@
 
 import UploadMessageResponse from '../../interfaces/UploadMessageResponse';
 
-// Function to handle cat upload and send a response
 const catPost = (req: any, res: any) => {
   try {
-    const upCatData = {
-      filename: 'cat.jpg',
+    const catData = {
+      filename: req.file.filename,
       location: res.locals.coords,
     };
 
-    // Prepare the response object
     const response: UploadMessageResponse = {
-      message: 'Cat uploaded successfully',
-      data: upCatData,
+      message: 'cat uploaded',
+      data: catData,
     };
 
-    // Send the response to the client
     res.status(200).json(response);
   } catch (error) {
-    // Handle errors here
     console.error('Error processing cat upload:', error);
     res.status(500).json({error: 'Internal server error'});
   }

@@ -1,6 +1,3 @@
-import {Cat, CatTest} from '../../interfaces/Cat';
-import {Point} from 'geojson';
-const CatModel = require('../models/catModel');
 // TODO: Add resolvers for cat
 // 1. Queries
 // 1.1. cats
@@ -11,54 +8,120 @@ const CatModel = require('../models/catModel');
 // 2.1. createCat
 // 2.2. updateCat
 // 2.3. deleteCat
+import {Cat} from '../../interfaces/Cat';
+import catModel from '../models/catModel';
+import {Point} from 'geojson';
+
+interface CoordinatePoint {
+  lat: number;
+  lng: number;
+}
+
+interface AreaCoordinates {
+  topRight: CoordinatePoint;
+  bottomLeft: CoordinatePoint;
+}
 
 const catResolver = {
   Query: {
     async cats() {
-      return await CatModel.find();
+      const cats = await catModel.find({});
+      const catsArray: Cat[] = cats.map((cat) => {
+        const catOutput = {
+          cat_name: cat.cat_name,
+          weight: cat.weight,
+          birthdate: cat.birthdate,
+          filename: cat.filename,
+          location: cat.location,
+          owner: cat.owner,
+        };
+        return catOutput;
+      }) as Cat[];
+
+      return catsArray;
     },
-    async catById(cat: Cat) {
-      return await CatModel.findById(cat.id);
+
+    async catById(_parent: {}, cat: Cat['id']) {
+      const catFound = await catModel.findById(cat.id);
+      if (!catFound) {
+        throw new Error(`Cat with id ${cat} not found`);
+      }
+
+      const catOutput = {
+        id: cat,
+        cat_name: catFound.cat_name,
+        weight: catFound.weight,
+        birthdate: catFound.birthdate,
+        filename: catFound.filename,
+        location: catFound.location,
+        owner: catFound.owner,
+      };
+
+      return catOutput as Cat;
     },
-    async catsByOwner(cat: Cat) {
-      return await CatModel.find({owner: cat.owner});
+
+    async catsByOwner(_parent: {}, ownerId: Cat['owner']) {
+      const catsFound = await catModel.find({owner: ownerId.id});
+      const catsArray: Cat[] = catsFound.map((cat) => {
+        const catOutput = {
+          id: cat.id,
+          cat_name: cat.cat_name,
+          weight: cat.weight,
+          birthdate: cat.birthdate,
+          filename: cat.filename,
+          location: cat.location,
+          owner: cat.owner,
+        };
+        return catOutput;
+      }) as Cat[];
+
+      return catsArray;
     },
-    async catsByArea(_parent: undefined, args: Cat) {
-      return await CatModel.find({
+
+    async catsByArea(_parent: {}, coordinates: AreaCoordinates) {
+      const catsFound = await catModel.find({
         location: {
-          $near: {
-            $maxDistance: 1000,
-            $geometry: {
-              type: args.location.type,
-              coordinates: args.location.coordinates,
-            },
+          $geoWithin: {
+            $box: [
+              [coordinates.bottomLeft.lat, coordinates.bottomLeft.lng],
+              [coordinates.topRight.lat, coordinates.topRight.lng],
+            ],
           },
         },
       });
+
+      const catsArray: Cat[] = catsFound.map((cat) => {
+        const catLocation = cat.location as Point;
+
+        const catOutput = {
+          id: cat.id,
+          cat_name: cat.cat_name,
+          weight: cat.weight,
+          birthdate: cat.birthdate,
+          filename: cat.filename,
+          location: catLocation,
+          owner: cat.owner,
+        };
+        return catOutput;
+      }) as Cat[];
+
+      return catsArray;
     },
   },
+
   Mutation: {
-    createCat: async (_parent: undefined, cat: Cat) => {
-      return await CatModel.create(new CatModel(cat));
+    createCat: (_parent: {}, cat: Cat) => {
+      const newCat = new catModel(cat);
+      catModel.create(new catModel(newCat));
+      return newCat;
     },
-    updateCat: async (_parent: undefined, args: Cat) => {
-      const updateCat = await CatModel.findByIdAndUpdate(
-        args.id,
-        {
-          cat_name: args.cat_name,
-          weight: args.weight,
-          owner: args.owner,
-          filename: args.filename,
-          birthdate: args.birthdate,
-          location: args.location,
-        },
-        {new: true}
-      );
-      return updateCat;
+    updateCat: (_parent: {}, cat: Cat) => {
+      catModel.findOneAndUpdate(cat.id, cat, {new: true});
+      return cat;
     },
-    deleteCat: async (_parent: undefined, cat: Cat) => {
-      const deleteCat = await CatModel.findOneAndDelete({_id: cat.id});
-      return deleteCat;
+    deleteCat: (_parent: {}, cat: Cat) => {
+      catModel.findOneAndDelete({_id: cat.id});
+      return cat;
     },
   },
 };

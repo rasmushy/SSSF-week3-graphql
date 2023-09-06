@@ -1,5 +1,3 @@
-import {User} from '../../interfaces/User';
-const UserModel = require('../models/userModel');
 // TODO: Add resolvers for user
 // 1. Queries
 // 1.1. users
@@ -9,36 +7,33 @@ const UserModel = require('../models/userModel');
 // 2.2. updateUser
 // 2.3. deleteUser
 
+import {User} from '../../interfaces/User';
+import userModel from '../models/userModel';
+
 const userResolver = {
   Query: {
-    users: async (_parent: undefined, users: User) => {
-      return await UserModel.find();
+    async users() {
+      return await userModel.find();
     },
-    userById: async (_parent: undefined, user: User) => {
-      return await UserModel.findById(user.id);
+    async userById(_parent: {}, user: User['id']) {
+      return await userModel.findById(user.id);
     },
   },
   Mutation: {
-    createUser: async (_parent: undefined, user: User) => {
-      return await UserModel.create(new UserModel(user));
+    createUser: (_parent: {}, user: User) => {
+      const newUser = new userModel(user);
+      userModel.create(newUser);
+      return newUser;
     },
-    updateUser: async (_parent: undefined, args: User) => {
-      if (args.id) {
-        return await UserModel.findByIdAndUpdate(
-          args.id,
-          {
-            user_name: args.user_name,
-            email: args.email,
-          },
-          {new: true}
-        );
-      } else {
-        return null;
-      }
+    updateUser: (_parent: {}, user: User) => {
+      userModel.findOneAndUpdate(user.id, user, {
+        new: true,
+      });
+      return user;
     },
-    deleteUser: async (_parent: undefined, args: User) => {
-      const deletedUser = await UserModel.findByIdAndDelete(args.id);
-      return deletedUser;
+    deleteUser: (_parent: {}, user: User) => {
+      userModel.findOneAndDelete({_id: user.id});
+      return user;
     },
   },
 };
