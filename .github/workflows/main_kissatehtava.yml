@@ -52,12 +52,3 @@ jobs:
 
       - name: unzip artifact for deployment
         run: unzip release.zip
-
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'kissatehtava'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_001112410E38437B840658C867985537 }}
-          package: .
