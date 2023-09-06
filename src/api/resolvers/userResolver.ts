@@ -22,7 +22,7 @@ const userResolver = {
       }
 
       const userOutput = {
-        id: userFound._id,
+        id: user,
         user_name: userFound.user_name,
         email: userFound.email,
       };
