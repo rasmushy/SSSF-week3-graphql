@@ -16,7 +16,12 @@ const userResolver = {
       return await userModel.find();
     },
     async userById(_parent: {}, user: User['id']) {
-      return await userModel.findById(user.id);
+      const userFound = await userModel.findById(user.id);
+      if (!userFound) {
+        throw new Error(`User with id ${user} not found`);
+      }
+
+      return user as User;
     },
   },
   Mutation: {
