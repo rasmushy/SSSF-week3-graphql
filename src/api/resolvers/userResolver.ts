@@ -25,19 +25,19 @@ const userResolver = {
     },
   },
   Mutation: {
-    createUser: (_parent: {}, user: User) => {
+    createUser: async (_parent: {}, user: User) => {
       const newUser = new userModel(user);
-      userModel.create(newUser);
+      await userModel.create(newUser);
       return newUser;
     },
-    updateUser: (_parent: {}, user: User) => {
-      userModel.findOneAndUpdate(user.id, user, {
+    updateUser: async (_parent: {}, user: User) => {
+      await userModel.findOneAndUpdate(user.id, user, {
         new: true,
       });
       return user;
     },
-    deleteUser: (_parent: {}, user: User) => {
-      userModel.findOneAndDelete({_id: user.id});
+    deleteUser: async (_parent: {}, user: User) => {
+      await userModel.findOneAndDelete({_id: user.id});
       return user;
     },
   },

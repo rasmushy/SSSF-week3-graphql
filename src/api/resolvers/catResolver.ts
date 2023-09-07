@@ -110,17 +110,17 @@ const catResolver = {
   },
 
   Mutation: {
-    createCat: (_parent: {}, cat: Cat) => {
+    createCat: async (_parent: {}, cat: Cat) => {
       const newCat = new catModel(cat);
-      catModel.create(new catModel(newCat));
+      await catModel.create(newCat);
       return newCat;
     },
-    updateCat: (_parent: {}, cat: Cat) => {
-      catModel.findOneAndUpdate(cat.id, cat, {new: true});
+    updateCat: async (_parent: {}, cat: Cat) => {
+      await catModel.findOneAndUpdate(cat.id, cat, {new: true});
       return cat;
     },
-    deleteCat: (_parent: {}, cat: Cat) => {
-      catModel.findOneAndDelete({_id: cat.id});
+    deleteCat: async (_parent: {}, cat: Cat) => {
+      await catModel.findOneAndDelete({_id: cat.id});
       return cat;
     },
   },
