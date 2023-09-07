@@ -21,13 +21,7 @@ const userResolver = {
         throw new Error(`User with id ${user} not found`);
       }
 
-      const userOutput = {
-        id: user.id,
-        user_name: userFound.user_name,
-        email: userFound.email,
-      };
-
-      return userOutput;
+      return userFound;
     },
   },
   Mutation: {
