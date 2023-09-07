@@ -22,12 +22,12 @@ const userResolver = {
       }
 
       const userOutput = {
-        id: user,
+        id: user.id,
         user_name: userFound.user_name,
         email: userFound.email,
       };
 
-      return userOutput as User;
+      return userOutput;
     },
   },
   Mutation: {
